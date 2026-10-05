@@ -1,0 +1,20 @@
+#!/bin/bash
+ORIG=/home/tonya/Wolfram/Wolfram/15.1/Executables/WolframKernel
+LOG=/home/tonya/.local/share/wolfram-pool/wk-calls.log
+
+echo "$(date '+%T') PPID=$PPID PARENT=$(ps -o comm= -p $PPID 2>/dev/null) ARGS=[$*]" >> "$LOG"
+
+# Any call that includes -wstp is from the FrontEnd, parallel computing, or a tool
+# (VS Code extension, LSP server, subkernels) — pass through unchanged.
+for arg; do [[ "$arg" == "-wstp" ]] && exec "$ORIG" "$@"; done
+
+# Any call with system flags (-noinit, -nopaclet, -sandbox, etc.) is from a tool — pass through.
+for arg; do
+    case "$arg" in
+        -noinit|-nopaclet|-noicon|-nostartuppaclets|-sandbox|-pacletreadonly|-subkernel)
+            exec "$ORIG" "$@" ;;
+    esac
+done
+
+# Plain user invocations (-script, -noprompt, -run): route through pool via wolframscript.
+exec ~/.local/bin/wolframscript "$@"

@@ -1,0 +1,16 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Clipboard Config - Clipboard */
+
+@import "~/.config/rofi/master-config.rasi"
+
+/* ---- Entry ---- */
+entry {
+  width: 37%;
+  placeholder: "📋 Search Clipboard";
+}
+
+/* ---- Listview ---- */
+listview {
+  columns: 1;
+  lines: 8;
+}

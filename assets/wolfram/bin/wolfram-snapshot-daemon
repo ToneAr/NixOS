@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""
+wolfram-snapshot-daemon: Serve CRIU kernel snapshots to WolframFrontEnd.
+
+Listens on LISTEN_PORT (default 31416) for FE link-server connections.
+For each connection:
+  1. Reads FE's link-server handshake (need_msg_portY)
+  2. Opens a fresh ephemeral port P, responds msg_port=P
+  3. Accepts FE's WSTP data connection on P
+  4. exec's `criu restore --inherit-fd fd[kernel_data_fd]:fe_data_fd`
+
+The restored kernel resumes blocked on its first WSTP read. The FE's socket
+replaces the snapshot's dummy connection, so normal WSTP init proceeds (~1.5s).
+
+Reads from SNAP_DIR (default ~/.local/share/wolfram-snapshot/):
+  snapshot-meta.json  — {kernel_data_fd, data_port}
+  criu-image/         — CRIU dump directory
+"""
+
+import fcntl, json, os, signal, socket, sys, time
+from pathlib import Path
+
+LISTEN_PORT = int(os.environ.get("WSTP_LISTEN_PORT", "31416"))
+SNAP_DIR    = Path(os.environ.get("WSTP_SNAP_DIR",
+                str(Path.home() / ".local/share/wolfram-snapshot")))
+CRIU        = os.environ.get("CRIU_BIN", "criu")
+
+
+def _load_snap():
+    meta       = json.loads((SNAP_DIR / "snapshot-meta.json").read_text())
+    kernel_fd  = int(meta["kernel_data_fd"])
+    img_dir    = str(SNAP_DIR / "criu-image")
+    return kernel_fd, img_dir
+
+
+def _recv_exact(sock, n):
+    data = b""
+    while len(data) < n:
+        chunk = sock.recv(n - len(data))
+        if not chunk:
+            raise ConnectionError("FE disconnected")
+        data += chunk
+    return data
+
+
+def _serve_one(coord_conn: socket.socket, coord_addr, kernel_fd: int, img_dir: str):
+    try:
+        coord_conn.settimeout(10.0)
+
+        # Read link-server handshake: need_msg_portY (14 bytes)
+        handshake = _recv_exact(coord_conn, 14)
+        if not handshake.startswith(b'need_msg_port'):
+            raise ValueError(f"Unexpected handshake: {handshake!r}")
+
+        # Open fresh ephemeral listening socket for FE's WSTP data connection
+        data_srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        data_srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        data_srv.bind(("127.0.0.1", 0))
+        data_srv.listen(1)
+        data_port = data_srv.getsockname()[1]
+
+        # Respond with data port — no newline/null per protocol
+        coord_conn.sendall(f"msg_port={data_port}".encode())
+        coord_conn.close()
+
+        # Accept FE's data connection
+        data_srv.settimeout(15.0)
+        fe_data_conn, fe_data_addr = data_srv.accept()
+        data_srv.close()
+        print(f"[daemon] FE data connected from {fe_data_addr}", flush=True)
+
+    except Exception as e:
+        print(f"[daemon] handshake error from {coord_addr}: {e}", flush=True)
+        try:
+            coord_conn.close()
+        except Exception:
+            pass
+        return
+
+    fe_fd = fe_data_conn.fileno()
+
+    # Clear O_CLOEXEC so the fd survives exec into criu
+    flags = fcntl.fcntl(fe_fd, fcntl.F_GETFD)
+    fcntl.fcntl(fe_fd, fcntl.F_SETFD, flags & ~fcntl.FD_CLOEXEC)
+
+    # CRIU inherit-fd format: fd[CRIU_FD]:IMAGE_FD
+    #   CRIU_FD  = fd in THIS process (the socket to inject)
+    #   IMAGE_FD = fd number in the checkpoint image to replace
+    inherit_spec = f"fd[{fe_fd}]:{kernel_fd}"
+    print(f"[daemon] restoring kernel  --inherit-fd {inherit_spec}", flush=True)
+
+    pid = os.fork()
+    if pid == 0:
+        # Child: exec criu restore — FE's socket replaces the snapshot's data fd
+        os.execvp(CRIU, [
+            CRIU, "restore",
+            "-D", img_dir,
+            "--inherit-fd", inherit_spec,
+            "--restore-detached",
+            "--shell-job",
+            "--unprivileged",
+            "-v0",
+        ])
+        os._exit(1)
+
+    _, status = os.waitpid(pid, 0)
+    fe_data_conn.close()
+
+    if os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0:
+        print("[daemon] kernel restored OK", flush=True)
+    else:
+        print(f"[daemon] criu restore failed: status={status:#x}", flush=True)
+
+
+def main():
+    print("[daemon] loading snapshot…", flush=True)
+    try:
+        kernel_fd, img_dir = _load_snap()
+    except Exception as e:
+        print(f"[daemon] ERROR: {e}", flush=True)
+        sys.exit(1)
+
+    print(f"[daemon] kernel_fd={kernel_fd}  img={img_dir}", flush=True)
+
+    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    srv.bind(("127.0.0.1", LISTEN_PORT))
+    srv.listen(5)
+    print(f"[daemon] listening for FE on :{LISTEN_PORT}", flush=True)
+
+    def _sig(*_):
+        srv.close()
+        sys.exit(0)
+    signal.signal(signal.SIGTERM, _sig)
+    signal.signal(signal.SIGINT, _sig)
+
+    while True:
+        try:
+            conn, addr = srv.accept()
+        except OSError:
+            break
+        print(f"[daemon] FE coord connected from {addr}", flush=True)
+        _serve_one(conn, addr, kernel_fd, img_dir)
+
+
+if __name__ == "__main__":
+    main()

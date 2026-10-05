@@ -1,0 +1,68 @@
+{
+  "name": "wallust-plasma",
+  "base": "dark",
+  "styles": {
+    "string": "#961510",
+    "comment": {
+      "fg": "#9C5D3F",
+      "italic": true
+    },
+    "number": "#731190",
+    "builtin_symbol": {
+      "fg": "#C23858",
+      "bold": true
+    },
+    "user_symbol": "#2C7415",
+    "completion_command": {
+      "fg": "#C23858",
+      "bold": true
+    },
+    "completion_symbol": "#C23858",
+    "completion_global_symbol": "#851480",
+    "completion_user_symbol": "#2C7415",
+    "completion_context": {
+      "fg": "#731190",
+      "bold": true
+    },
+    "completion_option": "#953B11",
+    "completion_directory": {
+      "fg": "#961510",
+      "bold": true
+    },
+    "completion_file": "#F1A582",
+    "menu_text": "#F1A582",
+    "menu_selected_text": {
+      "fg": "#000104",
+      "bg": "#C23858",
+      "bold": true
+    },
+    "menu_description": "#953B11",
+    "menu_match": {
+      "fg": "#C23858",
+      "underline": true
+    },
+    "menu_selected_match": {
+      "fg": "#000104",
+      "bg": "#C23858",
+      "bold": true,
+      "underline": true
+    },
+    "visual_selection": {
+      "fg": "#000104",
+      "bg": "#C23858"
+    },
+    "prompt_left": {
+      "fg": "#C23858",
+      "bold": true
+    },
+    "prompt_multiline_text": {
+      "fg": "#731190",
+      "bold": true
+    },
+    "prompt_right_text": {
+      "fg": "#953B11",
+      "bold": true
+    },
+    "prompt_multiline": "#F1A582"
+  }
+}

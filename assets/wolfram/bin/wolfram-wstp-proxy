@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""
+wolfram-wstp-proxy: TCP proxy between WolframNB and WolframKernel.
+
+Records all bytes in both directions during snapshot creation.
+Writes session.json + sync-point.json + sentinel files to SNAP_DIR.
+
+  direction "c" = client (FE) → server (kernel)
+  direction "s" = server (kernel) → client (FE)
+"""
+
+import fcntl, json, os, signal, socket, sys, threading, time
+from pathlib import Path
+
+PROXY_PORT  = int(os.environ.get("WSTP_PROXY_PORT",  "31415"))
+KERNEL_PORT = int(os.environ.get("WSTP_KERNEL_PORT", "31414"))
+IDLE_SECS   = float(os.environ.get("WSTP_IDLE_SECS", "5.0"))
+SNAP_DIR    = Path(os.environ.get("WSTP_SNAP_DIR",
+                str(Path.home() / ".local/share/wolfram-snapshot")))
+
+_records: list  = []
+_lock           = threading.Lock()
+_last_ts        = [0.0]
+_t0             = [0.0]
+_sync_done      = threading.Event()
+
+
+def _relay(src: socket.socket, dst: socket.socket, direction: str, done: threading.Event):
+    src.settimeout(1.0)
+    while not done.is_set():
+        try:
+            buf = src.recv(65536)
+            if not buf:
+                done.set()
+                break
+            now = time.monotonic()
+            with _lock:
+                _records.append({"d": direction, "t": round(now - _t0[0], 4),
+                                  "b": buf.hex()})
+                _last_ts[0] = now
+            try:
+                dst.sendall(buf)
+            except OSError:
+                done.set()
+                break
+        except socket.timeout:
+            now = time.monotonic()
+            if _last_ts[0] > 0 and (now - _last_ts[0]) > IDLE_SECS and not _sync_done.is_set():
+                _sync_done.set()
+                _save_sync()
+        except OSError:
+            done.set()
+            break
+
+
+def _save_sync():
+    with _lock:
+        fe_b  = sum(len(bytes.fromhex(r["b"])) for r in _records if r["d"] == "c")
+        kn_b  = sum(len(bytes.fromhex(r["b"])) for r in _records if r["d"] == "s")
+        n_pkt = len(_records)
+    sync = {"fe_bytes": fe_b, "kernel_bytes": kn_b, "packets": n_pkt}
+    (SNAP_DIR / "sync-point.json").write_text(json.dumps(sync, indent=2))
+    (SNAP_DIR / "sync-ready").touch()
+    print(f"[proxy] sync-point  FE={fe_b}B  kernel={kn_b}B  pkts={n_pkt}", flush=True)
+
+
+def _save_session():
+    with _lock:
+        data = list(_records)
+    (SNAP_DIR / "session.json").write_text(json.dumps(data))
+    print(f"[proxy] session saved  {len(data)} records", flush=True)
+
+
+def main():
+    SNAP_DIR.mkdir(parents=True, exist_ok=True)
+    for stale in ("proxy-ready", "sync-ready", "session.json", "sync-point.json"):
+        (SNAP_DIR / stale).unlink(missing_ok=True)
+
+    def _sig(*_):
+        _save_session()
+        sys.exit(0)
+    signal.signal(signal.SIGTERM, _sig)
+    signal.signal(signal.SIGINT, _sig)
+
+    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    srv.bind(("127.0.0.1", PROXY_PORT))
+    srv.listen(1)
+
+    (SNAP_DIR / "proxy-ready").touch()
+    print(f"[proxy] {PROXY_PORT} → {KERNEL_PORT}  idle={IDLE_SECS}s", flush=True)
+
+    fe_sock, fe_addr = srv.accept()
+    srv.close()
+    print(f"[proxy] FE connected {fe_addr}", flush=True)
+
+    kn_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    kn_sock.connect(("127.0.0.1", KERNEL_PORT))
+    print(f"[proxy] kernel connected :{KERNEL_PORT}", flush=True)
+
+    _t0[0]     = time.monotonic()
+    _last_ts[0] = _t0[0]
+    done = threading.Event()
+
+    threading.Thread(target=_relay, args=(fe_sock, kn_sock, "c", done), daemon=True).start()
+    threading.Thread(target=_relay, args=(kn_sock, fe_sock, "s", done), daemon=True).start()
+
+    done.wait()
+    fe_sock.close()
+    kn_sock.close()
+    _save_session()
+
+
+if __name__ == "__main__":
+    main()

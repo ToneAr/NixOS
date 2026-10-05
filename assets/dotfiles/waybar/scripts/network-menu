@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+set -u
+
+rofi_config="${ROFI_CONFIG:-$HOME/.config/rofi/config-compact.rasi}"
+rofi_args=(-dmenu -i -no-custom -matching fuzzy)
+
+if [[ -r "$rofi_config" ]]; then
+  rofi_args=(-config "$rofi_config" "${rofi_args[@]}")
+fi
+
+notify() {
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -a waybar-network "$1" "${2:-}" >/dev/null 2>&1 || true
+  fi
+}
+
+run_bg() {
+  setsid -f "$@" >/dev/null 2>&1 || true
+}
+
+choose() {
+  local prompt="$1"
+  shift
+  printf '%s\n' "$@" | rofi "${rofi_args[@]}" -p "$prompt"
+}
+
+nm_value() {
+  nmcli -g "$1" connection show uuid "$2" 2>/dev/null | sed -n '1p'
+}
+
+connection_label() {
+  case "$1" in
+    802-11-wireless) printf 'Wi-Fi' ;;
+    802-3-ethernet) printf 'Ethernet' ;;
+    vpn) printf 'VPN' ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
+active_summary() {
+  local summary
+  summary="$(nmcli -t --escape no -f NAME,TYPE,DEVICE connection show --active 2>/dev/null |
+    awk -F: '$2 ~ /802-11-wireless|802-3-ethernet|vpn/ { printf "%s%s", sep, $1; sep=", " }')"
+  printf '%s' "${summary:-No active user connections}"
+}
+
+toggle_wifi() {
+  local state="$1"
+  if [[ "$state" == "enabled" ]]; then
+    nmcli radio wifi off && notify "Wi-Fi disabled"
+  else
+    nmcli radio wifi on && notify "Wi-Fi enabled"
+  fi
+}
+
+rescan_wifi() {
+  nmcli device wifi rescan >/dev/null 2>&1 && notify "Wi-Fi scan requested"
+}
+
+open_plasma_network() {
+  if command -v plasmawindowed >/dev/null 2>&1; then
+    run_bg plasmawindowed org.kde.plasma.networkmanagement
+  else
+    run_bg nm-connection-editor
+  fi
+}
+
+edit_connections() {
+  run_bg nm-connection-editor
+}
+
+edit_connection() {
+  run_bg nm-connection-editor --edit="$1"
+}
+
+saved_connections_menu() {
+  local uuids=()
+  local menu=()
+  local uuid name type device label mark selected selected_uuid action
+
+  mapfile -t uuids < <(nmcli -t -f UUID connection show 2>/dev/null)
+
+  for uuid in "${uuids[@]}"; do
+    [[ -z "$uuid" ]] && continue
+
+    type="$(nm_value connection.type "$uuid")"
+    case "$type" in
+      802-11-wireless|802-3-ethernet|vpn) ;;
+      *) continue ;;
+    esac
+
+    name="$(nm_value connection.id "$uuid")"
+    device="$(nmcli -g GENERAL.DEVICES connection show uuid "$uuid" 2>/dev/null | sed -n '1p')"
+    label="$(connection_label "$type")"
+
+    if [[ -n "$device" && "$device" != "--" ]]; then
+      mark="*"
+    else
+      mark=" "
+    fi
+
+    menu+=("$mark $name [$label] <$uuid>")
+  done
+
+  if ((${#menu[@]} == 0)); then
+    notify "Network" "No saved Wi-Fi, Ethernet, or VPN profiles found"
+    return
+  fi
+
+  selected="$(choose "Connections" "${menu[@]}")" || return
+  [[ -z "$selected" ]] && return
+
+  selected_uuid="${selected##*<}"
+  selected_uuid="${selected_uuid%>}"
+  [[ -z "$selected_uuid" || "$selected_uuid" == "$selected" ]] && return
+
+  name="$(nm_value connection.id "$selected_uuid")"
+  device="$(nmcli -g GENERAL.DEVICES connection show uuid "$selected_uuid" 2>/dev/null | sed -n '1p')"
+
+  if [[ -n "$device" && "$device" != "--" ]]; then
+    action="$(choose "$name" "Disconnect" "Reconnect" "Edit profile" "Open editor")" || return
+  else
+    action="$(choose "$name" "Connect" "Edit profile" "Open editor")" || return
+  fi
+
+  case "$action" in
+    "Connect"|"Reconnect")
+      nmcli connection up uuid "$selected_uuid" && notify "Connected" "$name"
+      ;;
+    "Disconnect")
+      nmcli connection down uuid "$selected_uuid" && notify "Disconnected" "$name"
+      ;;
+    "Edit profile")
+      edit_connection "$selected_uuid"
+      ;;
+    "Open editor")
+      edit_connections
+      ;;
+  esac
+}
+
+vpn_menu() {
+  local uuids=()
+  local menu=()
+  local uuid name device mark selected selected_uuid action
+
+  mapfile -t uuids < <(nmcli -t -f UUID,TYPE connection show 2>/dev/null | awk -F: '$2 == "vpn" { print $1 }')
+
+  for uuid in "${uuids[@]}"; do
+    [[ -z "$uuid" ]] && continue
+    name="$(nm_value connection.id "$uuid")"
+    device="$(nmcli -g GENERAL.DEVICES connection show uuid "$uuid" 2>/dev/null | sed -n '1p')"
+
+    if [[ -n "$device" && "$device" != "--" ]]; then
+      mark="*"
+    else
+      mark=" "
+    fi
+
+    menu+=("$mark $name <$uuid>")
+  done
+
+  if ((${#menu[@]} == 0)); then
+    notify "VPN" "No saved VPN profiles found"
+    return
+  fi
+
+  selected="$(choose "VPN" "${menu[@]}")" || return
+  [[ -z "$selected" ]] && return
+
+  selected_uuid="${selected##*<}"
+  selected_uuid="${selected_uuid%>}"
+  [[ -z "$selected_uuid" || "$selected_uuid" == "$selected" ]] && return
+
+  name="$(nm_value connection.id "$selected_uuid")"
+  device="$(nmcli -g GENERAL.DEVICES connection show uuid "$selected_uuid" 2>/dev/null | sed -n '1p')"
+
+  if [[ -n "$device" && "$device" != "--" ]]; then
+    action="$(choose "$name" "Disconnect" "Reconnect" "Edit profile")" || return
+  else
+    action="$(choose "$name" "Connect" "Edit profile")" || return
+  fi
+
+  case "$action" in
+    "Connect"|"Reconnect")
+      nmcli connection up uuid "$selected_uuid" && notify "VPN connected" "$name"
+      ;;
+    "Disconnect")
+      nmcli connection down uuid "$selected_uuid" && notify "VPN disconnected" "$name"
+      ;;
+    "Edit profile")
+      edit_connection "$selected_uuid"
+      ;;
+  esac
+}
+
+main() {
+  local wifi_state summary choice wifi_action
+
+  wifi_state="$(nmcli -t -f WIFI radio 2>/dev/null | sed -n '1p')"
+  [[ "$wifi_state" == "enabled" ]] && wifi_action="Turn Wi-Fi off" || wifi_action="Turn Wi-Fi on"
+  summary="$(active_summary)"
+
+  choice="$(choose "Network" \
+    "Status: $summary" \
+    "Open Plasma network widget" \
+    "Saved connections" \
+    "VPN" \
+    "Rescan Wi-Fi" \
+    "$wifi_action" \
+    "Edit connections")" || return
+
+  case "$choice" in
+    "Open Plasma network widget")
+      open_plasma_network
+      ;;
+    "Saved connections")
+      saved_connections_menu
+      ;;
+    "VPN")
+      vpn_menu
+      ;;
+    "Rescan Wi-Fi")
+      rescan_wifi
+      ;;
+    "Turn Wi-Fi off"|"Turn Wi-Fi on")
+      toggle_wifi "$wifi_state"
+      ;;
+    "Edit connections")
+      edit_connections
+      ;;
+  esac
+}
+
+main "$@"

@@ -1,0 +1,241 @@
+#!/bin/bash
+# wolfram-snapshot-create: Build a CRIU snapshot of a fully-initialized WolframKernel.
+#
+# No proxy or FrontEnd needed. Steps:
+#   1. Start WolframKernel in WSTP listen mode on KERNEL_PORT (31414)
+#   2. Wait for kernel to reach poll() — fully initialized, both sockets open
+#   3. Link-server handshake: send need_msg_portY → receive msg_port=DATA_PORT
+#   4. Connect raw TCP to DATA_PORT (no WSTP data — kernel blocks waiting)
+#   5. Find kernel's accepted data connection fd
+#   6. CRIU dump the kernel
+#   7. Save metadata (kernel_data_fd, data_port)
+#   8. Clean up
+
+set -euo pipefail
+
+KERNEL=/home/tonya/Wolfram/Wolfram/15.1/Executables/WolframKernel
+KERNEL_PORT=31414
+SNAP_DIR="$HOME/.local/share/wolfram-snapshot"
+CRIU_IMAGE="$SNAP_DIR/criu-image"
+MAX_WAIT=120
+LOG="$SNAP_DIR/create.log"
+
+log() { echo "$(date '+%T') $*" | tee -a "$LOG"; }
+
+# ── pre-flight ────────────────────────────────────────────────────────────────
+
+CRIU_CAPS=$(getcap "$(which criu)" 2>/dev/null)
+if ! echo "$CRIU_CAPS" | grep -q cap_checkpoint_restore || \
+   ! echo "$CRIU_CAPS" | grep -q cap_sys_ptrace; then
+    echo "ERROR: CRIU needs cap_checkpoint_restore and cap_sys_ptrace."
+    echo "  Run:  sudo setcap cap_checkpoint_restore,cap_sys_ptrace+eip /usr/bin/criu"
+    exit 1
+fi
+
+# Kill any existing kernel listening on KERNEL_PORT
+existing_pid=$(ss -tlnp 2>/dev/null | \
+    awk "/:${KERNEL_PORT} /{match(\$0,/pid=([0-9]+)/,a); if(a[1]) print a[1]}" | head -1)
+if [[ -n "$existing_pid" ]]; then
+    log "Killing existing process on port $KERNEL_PORT (PID=$existing_pid)"
+    kill "$existing_pid" 2>/dev/null || true
+    sleep 0.5
+fi
+
+mkdir -p "$CRIU_IMAGE" "$SNAP_DIR"
+rm -f "$SNAP_DIR"/{kernel-fe-fd,snapshot-meta.json}
+rm -f "$CRIU_IMAGE"/*
+> "$LOG"
+
+log "Starting wolfram-snapshot-create"
+
+# ── start kernel in WSTP listen mode ─────────────────────────────────────────
+log "Starting WolframKernel on port $KERNEL_PORT"
+"$KERNEL" -wstp -linkprotocol TCPIP -linkmode listen -linkname "${KERNEL_PORT}@127.0.0.1" \
+    2>>"$LOG" &
+KERNEL_PID=$!
+log "Kernel PID=$KERNEL_PID"
+
+# ── wait for kernel to open coord socket ─────────────────────────────────────
+for i in $(seq 1 30); do
+    if ss -tlnp 2>/dev/null | grep -q ":${KERNEL_PORT}"; then break; fi
+    sleep 0.2
+done
+if ! ss -tlnp 2>/dev/null | grep -q ":${KERNEL_PORT}"; then
+    log "ERROR: Kernel did not open port $KERNEL_PORT"
+    kill $KERNEL_PID 2>/dev/null; exit 1
+fi
+log "Kernel coord socket open"
+
+# ── wait for kernel to be fully initialized (poll() state) ───────────────────
+log "Waiting for kernel to finish init (max ${MAX_WAIT}s)…"
+ELAPSED=0
+while true; do
+    wchan=$(cat /proc/$KERNEL_PID/wchan 2>/dev/null || echo "gone")
+    if [[ "$wchan" == "poll_schedule_timeout"* ]] || [[ "$wchan" == "do_select" ]]; then
+        log "Kernel initialized after ${ELAPSED}s (wchan=$wchan)"
+        break
+    fi
+    sleep 1
+    ELAPSED=$((ELAPSED + 1))
+    if (( ELAPSED % 10 == 0 )); then
+        log "  …${ELAPSED}s  wchan=$wchan"
+    fi
+    if (( ELAPSED >= MAX_WAIT )); then
+        log "ERROR: Kernel never reached poll() state after ${MAX_WAIT}s (wchan=$wchan)"
+        kill $KERNEL_PID 2>/dev/null; exit 1
+    fi
+done
+
+# Brief settle time
+sleep 0.5
+
+# ── link-server handshake + raw data connect + CRIU dump ─────────────────────
+log "Running link-server handshake and CRIU dump…"
+
+python3 - "$KERNEL_PID" "$KERNEL_PORT" "$SNAP_DIR" "$CRIU_IMAGE" <<'PYEOF'
+import socket, sys, os, time, json, subprocess
+
+kernel_pid  = int(sys.argv[1])
+kernel_port = int(sys.argv[2])
+snap_dir    = sys.argv[3]
+criu_image  = sys.argv[4]
+
+def log(msg):
+    print(msg, flush=True)
+
+# ── step 1: link-server handshake to discover DATA_PORT ──────────────────────
+coord = socket.socket()
+coord.settimeout(5)
+coord.connect(('127.0.0.1', kernel_port))
+coord.send(b'need_msg_portY')
+resp = coord.recv(64)
+coord.close()
+
+if not resp.startswith(b'msg_port='):
+    log(f'ERROR: unexpected coord response: {resp!r}')
+    sys.exit(1)
+
+# Response is "msg_port=PORT" optionally followed by a version byte
+import re
+m = re.match(rb'msg_port=(\d+)', resp)
+if not m:
+    log(f'ERROR: could not parse port from response: {resp!r}')
+    sys.exit(1)
+data_port = int(m.group(1))
+log(f'DATA_PORT={data_port}')
+
+# ── step 2: raw TCP connect to DATA_PORT (no WSTP) ───────────────────────────
+data_sock = socket.socket()
+data_sock.connect(('127.0.0.1', data_port))
+our_local_port = data_sock.getsockname()[1]
+log(f'Connected to data port {data_port} from local port {our_local_port}')
+
+def get_kernel_tcp_sockets(pid):
+    """Return dict: inode -> (local_port, remote_port, state_hex) for all TCP sockets."""
+    result = {}
+    try:
+        inodes = {}
+        for fd_name in os.listdir(f'/proc/{pid}/fd'):
+            try:
+                t = os.readlink(f'/proc/{pid}/fd/{fd_name}')
+                if t.startswith('socket:'):
+                    inodes[int(t[8:-1])] = fd_name
+            except Exception:
+                pass
+        for line in open(f'/proc/{pid}/net/tcp'):
+            parts = line.split()
+            if len(parts) < 10:
+                continue
+            try:
+                inode = int(parts[9])
+                if inode in inodes:
+                    lport = int(parts[1].split(':')[1], 16)
+                    rport = int(parts[2].split(':')[1], 16)
+                    result[inodes[inode]] = (lport, rport, parts[3])
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return result
+
+# ── step 3: find kernel's accepted data fd ───────────────────────────────────
+kernel_data_fd = None
+for attempt in range(50):
+    time.sleep(0.1)
+    socks = get_kernel_tcp_sockets(kernel_pid)
+    for fd_name, (lport, rport, state) in socks.items():
+        if state == '01' and lport == data_port and rport == our_local_port:
+            kernel_data_fd = fd_name
+            break
+    if kernel_data_fd:
+        break
+
+if not kernel_data_fd:
+    log('ERROR: Could not find kernel data fd')
+    data_sock.close()
+    sys.exit(1)
+
+log(f'kernel_data_fd={kernel_data_fd}')
+
+# ── step 3b: wait for coord-accepted socket to fully close ───────────────────
+# CRIU needs iptables to lock ESTABLISHED/CLOSE_WAIT sockets but can't run
+# iptables as non-root. Wait until the only remaining TCP sockets are LISTEN
+# (0A) or our specific ESTABLISHED data socket, so CRIU only sees clean state.
+log('Waiting for coord socket to close…')
+for attempt in range(50):
+    time.sleep(0.1)
+    socks = get_kernel_tcp_sockets(kernel_pid)
+    # Only keep sockets we want CRIU to see: LISTEN (0A) or our data ESTABLISHED (01)
+    dirty = [(fd, lp, rp, st) for fd, (lp, rp, st) in socks.items()
+             if st not in ('0A',)          # allow LISTEN
+             and not (st == '01' and lp == data_port and rp == our_local_port)]  # allow our data
+    if not dirty:
+        break
+else:
+    log(f'Warn: non-clean sockets remain: {dirty}')  # proceed anyway
+
+# ── step 4: CRIU dump ────────────────────────────────────────────────────────
+os.makedirs(criu_image, exist_ok=True)
+ret = subprocess.run(
+    ['criu', 'dump',
+     '-t', str(kernel_pid),
+     '-D', criu_image,
+     '--tcp-close',        # no iptables needed; --inherit-fd replaces data fd on restore
+     '--shell-job',
+     '--leave-running',
+     '--unprivileged',
+     '-v0'],
+    capture_output=True, text=True
+)
+
+if ret.returncode != 0:
+    log(f'ERROR: CRIU dump failed (rc={ret.returncode})')
+    log(f'STDOUT: {ret.stdout[-2000:]}')
+    log(f'STDERR: {ret.stderr[-2000:]}')
+    data_sock.close()
+    sys.exit(1)
+
+log('CRIU dump succeeded')
+
+# ── step 5: save metadata ─────────────────────────────────────────────────────
+meta = {
+    'data_port':      data_port,
+    'kernel_data_fd': int(kernel_data_fd),
+}
+json.dump(meta, open(f'{snap_dir}/snapshot-meta.json', 'w'))
+open(f'{snap_dir}/kernel-fe-fd', 'w').write(kernel_data_fd)
+
+# Close data socket — kernel will see disconnect
+data_sock.close()
+
+log(f'DONE  kernel_data_fd={kernel_data_fd}  data_port={data_port}')
+PYEOF
+
+# ── clean up ──────────────────────────────────────────────────────────────────
+log "Shutting down kernel (PID=$KERNEL_PID)"
+kill "$KERNEL_PID" 2>/dev/null || true
+
+META=$(python3 -c "import json; d=json.load(open('$SNAP_DIR/snapshot-meta.json')); \
+    print(f\"kernel_data_fd={d['kernel_data_fd']}  data_port={d['data_port']}\")" 2>/dev/null || echo "?")
+log "Snapshot complete — $META"
+log "Image: $CRIU_IMAGE"

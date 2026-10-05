@@ -1,0 +1,77 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Main Config - KRunner-style dense list */
+
+@import "~/.config/rofi/master-config.rasi"
+
+/* ---- Window ---- */
+window {
+    width:          32%;
+    border:          1px;
+    border-radius:   10px;
+}
+
+/* ---- Main Box ---- */
+mainbox {
+    padding: 8px;
+}
+
+/* ---- Inputbar ---- */
+inputbar {
+    padding:          8px 10px;
+    margin:           0px;
+    border-radius:    8px;
+    background-image: none;
+    background-color: transparent;
+}
+
+/* ---- Entry input ---- */
+entry {
+    enabled:          true;
+    expand:           true;
+    padding:          8px 10px;
+    border-radius:    8px;
+    background-color: transparent;
+    text-color:       @foreground;
+    placeholder-color: @foreground;
+    font:             "Fira Code SemiBold 13";
+}
+
+/* ---- Mode Switcher ---- */
+button {
+    width:            36px;
+    padding:          8px;
+    border-radius:    8px;
+}
+
+/* ---- Listbox ---- */
+listbox {
+    spacing: 4px;
+    padding: 6px 0px 0px 0px;
+}
+
+/* ---- Listview ---- */
+listview {
+    columns:       1;
+    lines:         9;
+    spacing:       2px;
+    fixed-height:  true;
+}
+
+/* ---- Element ---- */
+element {
+    orientation:   horizontal;
+    padding:       6px 10px;
+    spacing:       10px;
+    border-radius: 6px;
+}
+
+element-icon {
+    size:                24px;
+    vertical-align:      0.5;
+}
+
+element-text {
+    font:               "Fira Code Medium 12";
+    vertical-align:     0.5;
+    horizontal-align:   0.0;
+}

@@ -1,0 +1,106 @@
+@import "wallust/colors-waybar.css";
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "Roboto", "Helvetica", "Arial", sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  border: none;
+  border-radius: 0;
+}
+
+window#waybar {
+  background-color: transparent;
+}
+
+#workspaces,
+#window,
+#pulseaudio,
+#network,
+#bluetooth,
+#cpu,
+#memory,
+#battery,
+#clock,
+#tray {
+  background: alpha(@background, 0.65);
+  color: @foreground;
+  padding: 0px 16px;
+  margin: 4px 4px;
+  border-radius: 20px;
+  border: 1px solid alpha(@color7, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#workspaces {
+  background: linear-gradient(45deg, alpha(@color7, 0.2), alpha(@background, 0.65));
+  padding: 0px 8px;
+}
+
+#workspaces button {
+  padding: 0px 8px;
+  color: alpha(@foreground, 0.5);
+  transition: all 0.3s ease;
+}
+
+#workspaces button.active {
+  color: @color7;
+  font-size: 15px;
+}
+
+#workspaces button:hover {
+  color: @color7;
+  background: transparent;
+}
+
+#window {
+  background: alpha(@background, 0.4);
+  min-width: 250px;
+}
+
+#window,
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#bluetooth,
+#battery,
+#clock {
+  color: @color7;
+}
+
+#bluetooth.disabled {
+  color: alpha(@foreground, 0.4);
+}
+
+#battery {
+  transition: color 0.4s ease, background 0.4s ease;
+}
+
+#battery.charging,
+#battery.plugged {
+  background: linear-gradient(45deg, alpha(@color7, 0.15), alpha(@background, 0.65));
+}
+
+#battery.warning {
+  color: alpha(@color7, 0.7);
+}
+
+#battery.critical {
+  color: @foreground;
+  background: linear-gradient(45deg, alpha(@color7, 0.35), alpha(@background, 0.65));
+  animation: battery-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes battery-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.45; }
+  100% { opacity: 1; }
+}
+
+#clock {
+  background: linear-gradient(45deg, alpha(@background, 0.65), alpha(@color7, 0.2));
+}
+
+#tray {
+  background: alpha(@background, 0.6);
+}

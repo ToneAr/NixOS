@@ -1,0 +1,63 @@
+* {{
+    font-family: "Fira Code SemiBold";
+    font-size: 14px;
+}}
+
+window {{
+    background-color: {background}cc;
+    border: 2px solid {color7};
+    border-radius: 18px;
+    color: {foreground};
+}}
+
+#input {{
+    background-color: {color7}28;
+    border: 1px solid {color7};
+    border-radius: 12px;
+    color: {foreground};
+    padding: 10px 14px;
+    margin: 10px 10px 6px 10px;
+}}
+
+#input:focus {{
+    border-color: {color7};
+    outline: none;
+}}
+
+#inner-box {{
+    background-color: transparent;
+    padding: 4px 6px;
+}}
+
+#outer-box {{
+    background-color: transparent;
+    padding: 6px;
+}}
+
+#scroll {{
+    background-color: transparent;
+    margin: 0 4px 6px 4px;
+}}
+
+#text {{
+    color: {foreground};
+    padding: 2px 6px;
+}}
+
+#text:selected {{
+    color: {background};
+}}
+
+#entry {{
+    border-radius: 10px;
+    padding: 6px 8px;
+}}
+
+#entry:selected {{
+    background-color: {color7};
+    border-radius: 10px;
+}}
+
+#entry image {{
+    margin-right: 8px;
+}}

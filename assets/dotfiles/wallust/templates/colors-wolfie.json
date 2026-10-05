@@ -1,0 +1,29 @@
+{
+  "name": "wallust-plasma",
+  "base": "dark",
+  "styles": {
+    "string": "{color10}",
+    "comment": { "fg": "{color8}", "italic": true },
+    "number": "{color11}",
+    "builtin_symbol": { "fg": "{color7}", "bold": true },
+    "user_symbol": "{color13}",
+    "completion_command": { "fg": "{color7}", "bold": true },
+    "completion_symbol": "{color7}",
+    "completion_global_symbol": "{color12}",
+    "completion_user_symbol": "{color13}",
+    "completion_context": { "fg": "{color11}", "bold": true },
+    "completion_option": "{color14}",
+    "completion_directory": { "fg": "{color10}", "bold": true },
+    "completion_file": "{foreground}",
+    "menu_text": "{foreground}",
+    "menu_selected_text": { "fg": "{background}", "bg": "{color7}", "bold": true },
+    "menu_description": "{color14}",
+    "menu_match": { "fg": "{color7}", "underline": true },
+    "menu_selected_match": { "fg": "{background}", "bg": "{color7}", "bold": true, "underline": true },
+    "visual_selection": { "fg": "{background}", "bg": "{color7}" },
+    "prompt_left": { "fg": "{color7}", "bold": true },
+    "prompt_multiline_text": { "fg": "{color11}", "bold": true },
+    "prompt_right_text": { "fg": "{color14}", "bold": true },
+    "prompt_multiline": "{foreground}"
+  }
+}

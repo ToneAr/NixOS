@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ToneAr/wolfie/main/schemas/config.schema.json",
+  "theme": "wallust-plasma",
+  "command": {
+    "graphical-output": true,
+    "linkconnect": true,
+    "linkname": "31415@0.0.0.0",
+    "linkprotocol": "TCPIP",
+    "linkoptions": 4,
+    "linkinit": true
+  }
+}

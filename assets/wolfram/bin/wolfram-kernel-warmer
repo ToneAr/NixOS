@@ -1,0 +1,44 @@
+#!/bin/bash
+# Keeps a pre-warmed WolframKernel listening on a fixed SharedMemory link.
+# The FrontEnd connects to it instead of cold-starting a new kernel.
+# When the kernel exits (user evaluated Quit), this daemon respawns immediately.
+
+KERNEL=/home/tonya/Wolfram/Wolfram/15.1/Executables/WolframKernel
+LINK_NAME=wolfram-warm_shm
+SHM_DIR=/tmp/MathLink
+LOG=/home/tonya/.local/share/wolfram-pool/kernel-warmer.log
+
+mkdir -p "$(dirname "$LOG")"
+
+log() { echo "$(date '+%T') $*" >> "$LOG"; }
+
+log "Kernel warmer daemon started (PID=$$)"
+
+while true; do
+    # Clean up any stale shared memory files from a previous kernel
+    rm -f "$SHM_DIR/${LINK_NAME}"* "$SHM_DIR/mlshm-${LINK_NAME}"* 2>/dev/null
+
+    log "Starting warm kernel on SharedMemory:${LINK_NAME}"
+
+    "$KERNEL" -wstp -linkprotocol SharedMemory -linkname "$LINK_NAME" -linkmode listen &
+    KPID=$!
+
+    log "Warm kernel PID=$KPID — waiting for it to be ready..."
+
+    # Wait for SharedMemory files to appear (kernel is ready to accept connections)
+    for i in $(seq 1 60); do
+        [[ -e "$SHM_DIR/${LINK_NAME}rdlck" ]] && break
+        sleep 0.2
+    done
+
+    log "Warm kernel PID=$KPID ready"
+
+    # Signal readiness (other scripts can check for this file)
+    touch /tmp/wolfram-warm-ready
+
+    wait "$KPID"
+    EXIT_CODE=$?
+
+    rm -f /tmp/wolfram-warm-ready
+    log "Warm kernel PID=$KPID exited (code=$EXIT_CODE) — respawning immediately"
+done
