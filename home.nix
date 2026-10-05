@@ -2,7 +2,8 @@
 
 let
   # Import your standalone file and pass pkgs to it
-  yamis-pkg = (import ./yamis.nix { inherit pkgs; }).yet-another-monochrome-icon-set;
+  yamis-pkg = (import ./additions/yamis.nix { inherit pkgs; }).yet-another-monochrome-icon-set;
+  breezex-pkg = (import ./additions/breezex.nix { inherit pkgs; }).breezex-cursor;
 in
 {
   home.username = username;
@@ -10,21 +11,22 @@ in
   home.packages = [ yamis-pkg ];
 
   imports = [
-    ./home-base.nix    # XDG dirs, session variables, git, direnv
-    ./applications.nix # App set
-    ./dotfiles.nix     # nvim, fish, ghostty, waybar, rofi, ... from Arch
-    ./memory-limits.nix # zen.slice + kwin memory cap
-    ./plasma.nix       # Plasma settings, shortcuts, kwin rules
-    ./panels.nix       # Plasma panels
-    ./hyprland.nix     # Hyprland session
-    ./kde-rounded-corners.nix
-    ./klassy.nix
-    ./kde-glass.nix
+    ./home/home-base.nix
+    ./additions/applications.nix
+    ./home/dotfiles.nix
+    ./system/memory-limits.nix
+    ./home/plasma.nix
+    ./home/panels.nix
+    ./home/hyprland.nix
+    ./home/klassy.nix
+    ./additions/kde-glass.nix
   ];
 
   # Theme assets that are not packaged in nixpkgs, copied from the Arch box.
   # (YAMIS is packaged in yamis.nix and installed above.)
-  home.file.".icons/BreezeX-Dark".source = ./assets/BreezeX-Dark;
+  # BreezeX is fetched from its GitHub release in breezex.nix; ~/.icons is
+  # where every toolkit and XWayland looks for cursors.
+  home.file.".icons/BreezeX-Dark".source = "${breezex-pkg}/share/icons/BreezeX-Dark";
   home.file.".local/share/plasma/plasmoids/org.kde.windowtitle".source =
     ./assets/org.kde.windowtitle;
   home.file.".config/panel-colorizer/presets".source =

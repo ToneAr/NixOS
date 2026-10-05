@@ -31,7 +31,7 @@
   outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, ... }@inputs:
     let
       system = "x86_64-linux";
-      hostname = "nixos";
+      hostname = "tonya-nixos";
       username = "tonya";
     in {
       nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
@@ -39,10 +39,10 @@
         specialArgs = { inherit inputs username; };
         modules = [
           ./configuration.nix
-          ./hardware-configuration.nix
-          ./flatpak.nix
-          ./wolfram.nix
-          ./wolfie.nix
+          ./system/hardware-configuration.nix
+          ./additions/flatpak.nix
+          ./additions/wolfram.nix
+          ./additions/wolfie.nix
 
           nix-flatpak.nixosModules.nix-flatpak
           home-manager.nixosModules.home-manager

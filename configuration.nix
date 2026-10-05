@@ -15,7 +15,7 @@
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 557056;
 
   # ---- basics --------------------------------------------------------
-  networking.hostName = "nixos";   # keep in sync with flake.nix
+  networking.hostName = "tonya-nixos";   # keep in sync with flake.nix
   networking.networkmanager.enable = true;
   services.resolved.enable = true;
   time.timeZone = "Europe/London";
