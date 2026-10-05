@@ -5,7 +5,7 @@ Files that are not packaged in nixpkgs, copied from the Arch box.
   wallpapers/              hyprpaper wallpaper   (hyprland.nix)
   hypr-scripts/            scripts Hyprland binds call (hyprland.nix)
   dotfiles/                ghostty, kitty, waybar, rofi, swaync,
-                           wlogout, wallust, omp.json (dotfiles.nix)
+                           wlogout, wallust, klassy (dotfiles.nix)
   wolfram/bin/             Wolfram helper scripts (wolfram.nix, only when enabled)
   wolfie/                  wolfie config + theme, copied once if missing (wolfie.nix)
   seeds/                   wallust output, copied once if missing (dotfiles.nix)

@@ -1,0 +1,18 @@
+[Global]
+LookAndFeelSet=org.kde.breezedark.desktop
+
+[Windeco]
+WindowCornerRadius=20
+
+[Windeco Exception 0]
+BorderSize=0
+Enabled=true
+ExceptionBorder=false
+ExceptionMatchTitleBarToApplicationColor=false
+ExceptionPreset=
+ExceptionProgramNamePattern=
+ExceptionWindowPropertyPattern=.*
+ExceptionWindowPropertyType=0
+HideTitleBar=1
+OpaqueTitleBar=false
+PreventApplyOpacityToHeader=false

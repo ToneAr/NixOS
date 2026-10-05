@@ -26,6 +26,13 @@
 
     # Declarative Flatpak installs (the Arch box had 44 Flathub apps).
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
+
+    # oh-my-posh theme, linked to ~/.config/omp.json (home/dotfiles.nix).
+    # Bump with `nix flake update omp-theme`.
+    omp-theme = {
+      url = "github:ToneAr/ADAPTIVE-oh-my-posh-theme";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, ... }@inputs:

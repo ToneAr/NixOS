@@ -52,6 +52,22 @@
         "type": "github"
       }
     },
+    "omp-theme": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783196039,
+        "narHash": "sha256-aV2aDwyJqiYXbv2nYlzwLs/qZ/vZI5/CudFyvQQqh/g=",
+        "owner": "ToneAr",
+        "repo": "ADAPTIVE-oh-my-posh-theme",
+        "rev": "0149fe0bc2d5725c6cedff4e355ae11fe1f647d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ToneAr",
+        "repo": "ADAPTIVE-oh-my-posh-theme",
+        "type": "github"
+      }
+    },
     "plasma-manager": {
       "inputs": {
         "home-manager": [
@@ -80,6 +96,7 @@
         "home-manager": "home-manager",
         "nix-flatpak": "nix-flatpak",
         "nixpkgs": "nixpkgs",
+        "omp-theme": "omp-theme",
         "plasma-manager": "plasma-manager",
         "zen-browser": "zen-browser"
       }

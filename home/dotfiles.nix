@@ -9,7 +9,7 @@
 # Files that wallust regenerates are shipped as one-time seeds instead (see
 # home.activation below), so they exist on first login and wallust can
 # overwrite them afterwards.
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   dots = ../assets/dotfiles;
   seeds = ../assets/seeds;
@@ -70,6 +70,7 @@ in
   };
 
   xdg.configFile = {
+    "klassy" = linkDir "klassy";
     "ghostty" = linkDir "ghostty";
     "kitty" = linkDir "kitty";
     "waybar" = linkDir "waybar";
@@ -81,7 +82,7 @@ in
       config.lib.file.mkOutOfStoreSymlink "${fishCheckout}/functions";
     "fish/conf.d".source =
       config.lib.file.mkOutOfStoreSymlink "${fishCheckout}/conf.d";
-    "omp.json".source = "${dots}/omp.json";
+    "omp.json".source = "${inputs.omp-theme}/adaptive-omp.json";
   };
 
   # ---- fish ----------------------------------------------------------
