@@ -18,7 +18,6 @@ in
     ./home/plasma.nix
     ./home/panels.nix
     ./home/hyprland.nix
-    ./home/klassy.nix
     ./additions/kde-glass.nix
   ];
 

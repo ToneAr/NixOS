@@ -77,6 +77,8 @@
 
     # ---- editors / IDEs --------------------------------------------
     neovim
+    lua5_1                      # for lazy.nvim luarocks support (hererocks can't build on NixOS)
+    lua51Packages.luarocks
     vscode
     code-cursor
     zed-editor
