@@ -15,9 +15,9 @@
   programs.plasma = {
     enable = true;
     workspace = {
-      colorScheme = "KlassyDark";
+      colorScheme = "KlassyLight";
       widgetStyle = "Klassy";
-      theme = "klassy-dark";
+      theme = "klassy-light";
       iconTheme = "YAMIS";
       cursor.theme = "BreezeX-Dark";
       windowDecorations = {

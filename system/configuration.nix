@@ -62,21 +62,20 @@
     enable = true;
     powerOnBoot = true;
   };
-
-  # Synaptics 06cb:00f9 works with stock libfprint, no TOD driver needed.
-  # The module also turns on fingerprint auth in PAM (login, sddm, sudo).
+  
+  # Facial Recognition
+  # "sufficient" lets the password still work when no face matches; the
+  # module's default ("required") makes a failed face check block login/sudo.
+  services.howdy = {
+    enable = true;
+    control = "sufficient";
+  };
+  
+  # Fingerprint
   services.fprintd.enable = true;
 
   # Xbox wireless adapter (xone-dkms + xone-dongle-firmware on Arch).
   hardware.xone.enable = true;
-
-  # power-profiles-daemon is already enabled by the Plasma 6 module, which
-  # matches Arch (TLP is installed there but masked).
-
-  # DisplayLink dock: NOT enabled. It needs the unfree driver zip fetched by
-  # hand (nix-prefetch-url --name displaylink-*.zip ...) and the dock's NIC
-  # flaps anyway. When wanted:
-  #   services.xserver.videoDrivers = [ "displaylink" "modesetting" ];
 
   # ---- networked services --------------------------------------------
   # NixOS has a firewall on by default (Arch had none); each service below
@@ -129,13 +128,8 @@
   ];
 
   fonts.packages = with pkgs; [
-    # Space Grotesk, which panels.nix/plasma.nix set as the clock font.
     # Selective build: pulling all of google-fonts is several GB.
     (google-fonts.override { fonts = [ "Space Grotesk" ]; })
-
-    # Nerd Fonts installed on Arch. JetBrainsMono is the Plasma fixed font
-    # and ghostty font, 0xProto is Spectacle's annotation font, and
-    # oh-my-posh needs the symbols.
     nerd-fonts.jetbrains-mono
     nerd-fonts._0xproto
     nerd-fonts.caskaydia-cove

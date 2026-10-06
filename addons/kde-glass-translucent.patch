@@ -1,0 +1,36 @@
+diff -ru a/src/blur.cpp b/src/blur.cpp
+--- a/src/blur.cpp	2026-10-06 03:12:39.785554938 +0100
++++ b/src/blur.cpp	2026-10-06 03:12:39.808345761 +0100
+@@ -516,7 +516,9 @@
+         if (SurfaceInterface *surface = w->surface()) {
+ #ifdef GLASS_KWIN_67
+             const RegionF opaque = surface->opaque();
+-            if (!opaque.isEmpty()) {
++            // A KWin opacity rule makes the whole window translucent, so the
++            // client's opaque region no longer hides what is behind it.
++            if (!opaque.isEmpty() && w->opacity() >= 1.0) {
+                 const QPoint clientOffset = w->contentsRect().topLeft().toPoint();
+                 Region opaqueInFrame;
+                 for (const RectF &rect : opaque.rects()) {
+@@ -526,7 +528,9 @@
+             }
+ #else
+             const Region opaque = surface->opaque();
+-            if (!opaque.isEmpty()) {
++            // A KWin opacity rule makes the whole window translucent, so the
++            // client's opaque region no longer hides what is behind it.
++            if (!opaque.isEmpty() && w->opacity() >= 1.0) {
+                 const QPoint clientOffset = w->contentsRect().topLeft().toPoint();
+                 Region opaqueInFrame;
+                 for (const Rect &rect : opaque.rects()) {
+@@ -588,6 +592,10 @@
+         }
+     });
+ 
++    connect(w, &EffectWindow::windowOpacityChanged, this, [this, w]() {
++        updateBlurRegion(w);
++    });
++
+     if (auto internal = w->internalWindow()) {
+         internal->installEventFilter(this);
+     }

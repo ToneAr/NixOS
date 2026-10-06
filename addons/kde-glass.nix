@@ -12,6 +12,10 @@ let
       sha256 = "sha256-QMIscGqrEv8X5JbOkHk2SZw+OuyQOFdFzYYsiYgs1MI=";
     };
 
+    # Blur behind windows made translucent by a KWin opacity rule, even when
+    # the client (Chromium/Electron/Firefox on Wayland) declares itself opaque.
+    patches = [ ./kde-glass-translucent.patch ];
+
     nativeBuildInputs = with pkgs; [
       cmake
       kdePackages.extra-cmake-modules

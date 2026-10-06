@@ -64,7 +64,9 @@
           ./system/configuration.nix
           ./system/hardware-configuration.nix
           ./addons/flatpak.nix
+          ./addons/wolframscript.nix
           ./addons/wolfram.nix
+          ./addons/wljs-notebook.nix
           ./addons/wolfie.nix
 
           nix-flatpak.nixosModules.nix-flatpak

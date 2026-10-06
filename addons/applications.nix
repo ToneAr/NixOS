@@ -116,7 +116,7 @@
     blueman                     # waybar bluetooth on-click (blueman-manager)
 
     # ---- KDE apps you actually use ---------------------------------
-    kdePackages.dolphin         # $fileManager
+    kdePackages.dolphin
     kdePackages.ark
     kdePackages.okular
     kdePackages.gwenview
@@ -125,7 +125,14 @@
     kdePackages.kdenlive
     kdePackages.elisa
     kdePackages.kconfig
-    kde-rounded-corners
+    # Upstream hardcodes krunner as an exception, so its Plasma background
+    # kept square-ish corners poking out past the glass effect's rounding.
+    (kde-rounded-corners.overrideAttrs (old: {
+      postPatch = (old.postPatch or "") + ''
+        substituteInPlace src/WindowManager.cpp \
+          --replace-fail 'QStringLiteral("krunner"),' ""
+      '';
+    }))
 
     # ---- virt / remote ---------------------------------------------
     remmina
