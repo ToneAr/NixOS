@@ -41,7 +41,7 @@ configuration.nix    main NixOS config
 home.nix             Home Manager entry point
 system/              machine-level modules
 home/                Home Manager modules for the desktop session
-additions/           extra packages and opt-in features (system and home)
+addons/           extra packages and opt-in features (system and home)
 assets/              files copied from the Arch machine
 ```
 
@@ -71,7 +71,7 @@ assets/              files copied from the Arch machine
 | `hyprland.nix`      | Hyprland session |
 | `klassy.nix`        | Klassy window decoration config |
 
-### `additions/`
+### `addons/`
 
 | File               | Type          | Contents |
 | ------------------ | ------------- | -------- |
@@ -114,7 +114,7 @@ Wolfram/wolfie configs, and wallust seed files. See [`assets/README.md`](assets/
   `~/.config/fish/secrets.fish` if it exists; create it by hand with
   `chmod 600`.
 - **Unfree packages are allowed** (`nixpkgs.config.allowUnfree = true`) for
-  Chrome, VS Code, Obsidian, Zoom and others in `additions/applications.nix`.
+  Chrome, VS Code, Obsidian, Zoom and others in `addons/applications.nix`.
 - **Wolfram is not installed by Nix.** Install it with the official installer
   into `~/Wolfram/Wolfram/<version>`, then set `wolfram.enable = true` in
   `configuration.nix`.

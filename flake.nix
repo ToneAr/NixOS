@@ -47,9 +47,9 @@
         modules = [
           ./configuration.nix
           ./system/hardware-configuration.nix
-          ./additions/flatpak.nix
-          ./additions/wolfram.nix
-          ./additions/wolfie.nix
+          ./addons/flatpak.nix
+          ./addons/wolfram.nix
+          ./addons/wolfie.nix
 
           nix-flatpak.nixosModules.nix-flatpak
           home-manager.nixosModules.home-manager

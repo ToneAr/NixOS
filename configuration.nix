@@ -1,12 +1,8 @@
-{ config, pkgs, username, ... }:
+{ pkgs, username, ... }:
 {
-  # ---- boot ----------------------------------------------------------
+  # ---- Boot ----------------------------------------------------------
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = false;
-
-  # Kernel: left on the nixpkgs default (LTS). Arch runs mainline; switch with
-  #   boot.kernelPackages = pkgs.linuxPackages_latest;
-  # if you need newer amdgpu, at the cost of out-of-tree modules (xone) lagging.
 
   # From /etc/modprobe.d on Arch: nested virtualisation for libvirt guests.
   boot.extraModprobeConfig = "options kvm_amd nested=1";
@@ -14,7 +10,7 @@
   # From /etc/sysctl.d on Arch (editors/LSPs watching big trees).
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 557056;
 
-  # ---- basics --------------------------------------------------------
+  # ---- Basics --------------------------------------------------------
   networking.hostName = "tonya-nixos";   # keep in sync with flake.nix
   networking.networkmanager.enable = true;
   services.resolved.enable = true;
@@ -27,7 +23,7 @@
   hardware.cpu.amd.updateMicrocode = true;   # AuthenticAMD, per the old box
   hardware.enableRedistributableFirmware = true;
 
-  # ---- user ----------------------------------------------------------
+  # ---- User ----------------------------------------------------------
   users.users.${username} = {
     isNormalUser = true;
     description = "Antonis Aristeidou";
@@ -48,22 +44,20 @@
   };
   services.desktopManager.plasma6.enable = true;
 
-  # Hyprland as a second session choice at the SDDM greeter. The system-level
-  # option installs the session entry and xdg-desktop-portal-hyprland; the
-  # home-manager module in hyprland.nix writes the config.
+  # ---- Hyprland ------------------------------------------------------
   programs.hyprland.enable = true;
 
-  # Keyboard layout: Plasma on Arch (kxkbrc) and Hyprland both use plain US.
+  # ---- Keyboard layout -----------------------------------------------
   services.xserver.xkb.layout = "us";
 
-  # ---- audio ---------------------------------------------------------
+  # ---- Audio ---------------------------------------------------------
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
   };
 
-  # ---- hardware services (enabled on Arch) ----------------------------
+  # ---- Hardware services (enabled on Arch) ----------------------------
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;

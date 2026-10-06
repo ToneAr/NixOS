@@ -2,8 +2,8 @@
 
 let
   # Import your standalone file and pass pkgs to it
-  yamis-pkg = (import ./additions/yamis.nix { inherit pkgs; }).yet-another-monochrome-icon-set;
-  breezex-pkg = (import ./additions/breezex.nix { inherit pkgs; }).breezex-cursor;
+  yamis-pkg = (import ./addons/yamis.nix { inherit pkgs; }).yet-another-monochrome-icon-set;
+  breezex-pkg = (import ./addons/breezex.nix { inherit pkgs; }).breezex-cursor;
 in
 {
   home.username = username;
@@ -12,13 +12,13 @@ in
 
   imports = [
     ./home/home-base.nix
-    ./additions/applications.nix
+    ./addons/applications.nix
     ./home/dotfiles.nix
     ./system/memory-limits.nix
     ./home/plasma.nix
     ./home/panels.nix
     ./home/hyprland.nix
-    ./additions/kde-glass.nix
+    ./addons/kde-glass.nix
   ];
 
   # Theme assets that are not packaged in nixpkgs, copied from the Arch box.
