@@ -1,10 +1,12 @@
 {
-  description = "Tonya's NixOS desktop";
+  description = "Tone's NixOS";
 
   inputs = {
 
-    # Swap to "github:NixOS/nixpkgs/nixos-26.05" for the stable channel.
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05"; # for the stable channel.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -17,14 +19,11 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    # Zen is not in nixpkgs
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-
-    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
     omp-theme = {
       url = "github:ToneAr/ADAPTIVE-oh-my-posh-theme";
