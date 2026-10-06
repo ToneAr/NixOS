@@ -44,6 +44,9 @@
     htop
     imagemagick
     claude-code
+    claude-agent-acp            # ACP bridge: CodeCompanion <-> Claude Code
+    codex
+    codex-acp                   # ACP bridge: CodeCompanion <-> Codex
 
     # ---- dev -------------------------------------------------------
     gh
