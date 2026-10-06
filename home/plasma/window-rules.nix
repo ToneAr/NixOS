@@ -17,7 +17,7 @@
       kwinrulesrc.opaque.opacityinactive = 100;
       kwinrulesrc.opaque.opacityinactiverule = 2;
       kwinrulesrc.opaque.wmclasscomplete = true;
-      kwinrulesrc.opaque.title = "(Picture-in-Picture)|(.* - Youtube.*)";
+      kwinrulesrc.opaque.title = "(Picture-in-Picture)|(.* - YouTube.*)";
       kwinrulesrc.opaque.titlematch = 3;
 
       kwinrulesrc.kitty.Description = "Kitty";
