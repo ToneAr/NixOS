@@ -14,7 +14,7 @@ let
 
     # Blur behind windows made translucent by a KWin opacity rule, even when
     # the client (Chromium/Electron/Firefox on Wayland) declares itself opaque.
-    patches = [ ./kde-glass-translucent.patch ];
+    patches = [ ../patches/kde-glass-translucent.patch ];
 
     nativeBuildInputs = with pkgs; [
       cmake
