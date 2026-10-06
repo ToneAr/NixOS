@@ -1,9 +1,8 @@
 # NixOS desktop
 
-Flake-based NixOS configuration for a single machine (`tonya-nixos`, user `tonya`),
-ported from an Arch Linux install. It sets up KDE Plasma 6 as the main session
-and Hyprland as a second option at the SDDM greeter, with Home Manager and
-plasma-manager handling the user side.
+Flake-based NixOS configuration for a single machine (`tonya-nixos`, user `tonya`).
+It sets up KDE Plasma 6 as the main session and Hyprland as a second option at
+the SDDM greeter, with Home Manager and plasma-manager handling the user side.
 
 ## Usage
 
@@ -41,7 +40,7 @@ configuration.nix    main NixOS config
 home.nix             Home Manager entry point
 system/              machine-level modules
 home/                Home Manager modules for the desktop session
-addons/           extra packages and opt-in features (system and home)
+addons/              extra packages and opt-in features (system and home)
 assets/              files copied from the Arch machine
 ```
 

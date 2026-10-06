@@ -2,7 +2,7 @@
   description = "Tonya's NixOS desktop";
 
   inputs = {
-    # Rolling, to match the Plasma 6.7.5 that wrote the configs in plasma.nix.
+
     # Swap to "github:NixOS/nixpkgs/nixos-26.05" for the stable channel.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -17,35 +17,51 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    # Zen is not in nixpkgs (zen-browser-bin from the AUR on Arch).
+    # Zen is not in nixpkgs
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
 
-    # Declarative Flatpak installs (the Arch box had 44 Flathub apps).
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
-    # oh-my-posh theme, linked to ~/.config/omp.json (home/dotfiles.nix).
-    # Bump with `nix flake update omp-theme`.
     omp-theme = {
       url = "github:ToneAr/ADAPTIVE-oh-my-posh-theme";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, plasma-manager, nix-flatpak, ... }@inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      plasma-manager,
+      nix-flatpak,
+      ...
+    }@inputs:
     let
       system = "x86_64-linux";
       hostname = "tonya-nixos";
       username = "tonya";
-    in {
+      pkgs = nixpkgs.legacyPackages.${system};
+    in
+    {
+      devShells.${system}.default = pkgs.mkShellNoCC {
+        packages = with pkgs; [
+          nixfmt
+          nil
+          statix
+          deadnix
+        ];
+      };
+
       nixosConfigurations.${hostname} = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs username; };
         modules = [
-          ./configuration.nix
+          ./system/configuration.nix
           ./system/hardware-configuration.nix
           ./addons/flatpak.nix
           ./addons/wolfram.nix
@@ -57,14 +73,12 @@
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              # Existing unmanaged files are renamed to *.backup instead of
-              # failing activation.
+              # Existing unmanaged files are renamed to *.backup
               backupFileExtension = "backup";
               extraSpecialArgs = { inherit inputs username; };
-              # plasma-manager has to be a *home-manager* module, so it is
-              # imported here rather than in the NixOS module list above.
+              # plasma-manager has to be a *home-manager* module
               sharedModules = [ plasma-manager.homeModules.plasma-manager ];
-              users.${username} = import ./home.nix;
+              users.${username} = import ./home/home.nix;
             };
           }
         ];
