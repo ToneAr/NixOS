@@ -10,6 +10,7 @@
     ./wljs-notebook.nix
     ./wolfie.nix
     ./kde-glass.nix
+    ./kde-geometry-change.nix
     ./plasma-glass-theme.nix
   ];
 }

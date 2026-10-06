@@ -66,6 +66,7 @@
       kwinrc.Plugins.kinetic_fadingpopupsEnabled = true;
       kwinrc.Plugins.kinetic_maximizeEnabled = false;
       kwinrc.Plugins.krohnkiteEnabled = true;
+      kwinrc.Plugins.kwin4_effect_geometry_changeEnabled = true;
       kwinrc.Plugins.kwin4_effect_squashEnabled = false;
       kwinrc.Plugins.lightlyshaders_blurEnabled = false;
       kwinrc.Plugins.magiclampEnabled = true;

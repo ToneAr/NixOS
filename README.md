@@ -75,6 +75,7 @@ some also add Home Manager config through `home-manager.users.<name>`.
 | `flatpak.nix`            | Flathub apps installed by nix-flatpak |
 | `breezex.nix`            | BreezeX-Dark cursor theme from the GitHub release, linked into `~/.icons` |
 | `yamis.nix`              | YAMIS icon theme |
+| `kde-geometry-change.nix` | [Geometry Change](https://github.com/peterfajdiga/kwin4_effect_geometry_change) KWin effect (animates windows moved/resized by programs and scripts) |
 | `kde-glass.nix`          | `kwin-effects-glass` KWin effect, built from source with `patches/kde-glass-translucent.patch` |
 | `plasma-glass-theme.nix` | `klassy-{dark,light}-glass` Plasma styles and `KlassyDarkGlass`/`KlassyLightGlass` colour schemes, derived from Klassy to match the Panel Colorizer panels |
 | `wolframscript.nix`      | Wolfram Engine 15 (`wolframscript`) |
