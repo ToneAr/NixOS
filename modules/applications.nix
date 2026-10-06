@@ -1,11 +1,3 @@
-# Commonly used applications.
-#
-# This is NOT a transcription of `pacman -Qe` — that was 500 packages, mostly
-# the entire KDE application suite pulled in by group installs. This is the set
-# with actual evidence of use: referenced by your Hyprland binds, your Plasma
-# panel launchers, your Plasma autostart entries, or your fish config.
-#
-# Every attribute here was checked against nixpkgs before being written down.
 { pkgs, username, ... }:
 {
   users.users.${username}.packages = with pkgs; [
@@ -44,16 +36,16 @@
     htop
     imagemagick
     claude-code
-    claude-agent-acp            # ACP bridge: CodeCompanion <-> Claude Code
+    claude-agent-acp
     codex
-    codex-acp                   # ACP bridge: CodeCompanion <-> Codex
+    codex-acp
 
     # ---- dev -------------------------------------------------------
     gh
     lazygit
     lazydocker
     opencode
-    powershell                  # was a snap on Arch
+    powershell
     nodejs
     pnpm
     go
@@ -80,7 +72,7 @@
 
     # ---- editors / IDEs --------------------------------------------
     neovim
-    lua5_1                      # for lazy.nvim luarocks support (hererocks can't build on NixOS)
+    lua5_1
     lua51Packages.luarocks
     vscode
     code-cursor
@@ -99,24 +91,24 @@
     discord
 
     # ---- Hyprland session ------------------------------------------
-    waybar                      # exec-once
-    rofi                        # $menu, and ClipManager.sh  (rofi 2.x = wayland)
-    cliphist                    # exec-once clipboard history
-    wl-clipboard                # wl-paste / wl-copy
-    playerctl                   # media key binds
-    brightnessctl               # brightness binds
-    wlogout                     # Wlogout.sh
-    hyprpaper                   # exec-once  (also enabled as a service)
-    hyprlock                    # LockScreen.sh
-    nwg-displays                # what generated monitors.conf
-    wallust                     # generates the sourced colour file
-    grim                        # screenshots
+    waybar
+    rofi
+    cliphist
+    wl-clipboard
+    playerctl
+    brightnessctl
+    wlogout
+    hyprpaper
+    hyprlock
+    nwg-displays
+    wallust
+    grim
     slurp
-    kdePackages.spectacle       # Mod+Shift+S bind uses spectacle specifically
-    networkmanagerapplet        # nm-applet --indicator
-    libnotify                   # notify-send, used by AirplaneMode.sh
-    pavucontrol                 # waybar pulseaudio on-click
-    blueman                     # waybar bluetooth on-click (blueman-manager)
+    kdePackages.spectacle
+    networkmanagerapplet
+    libnotify
+    pavucontrol
+    blueman
 
     # ---- KDE apps you actually use ---------------------------------
     kdePackages.dolphin

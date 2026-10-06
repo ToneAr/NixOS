@@ -69,10 +69,8 @@
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              # Existing unmanaged files are renamed to *.backup
               backupFileExtension = "backup";
               extraSpecialArgs = { inherit inputs username; };
-              # plasma-manager has to be a *home-manager* module
               sharedModules = [ plasma-manager.homeModules.plasma-manager ];
               users.${username} = import ./home;
             };
