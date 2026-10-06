@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, username, ... }:
 
 let
   kwin-effects-glass = pkgs.stdenv.mkDerivation rec {
@@ -39,5 +39,5 @@ let
   };
 in
 {
-  home.packages = [ kwin-effects-glass ];
+  users.users.${username}.packages = [ kwin-effects-glass ];
 }

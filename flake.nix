@@ -61,13 +61,8 @@
         inherit system;
         specialArgs = { inherit inputs username; };
         modules = [
-          ./system/configuration.nix
-          ./system/hardware-configuration.nix
-          ./addons/flatpak.nix
-          ./addons/wolframscript.nix
-          ./addons/wolfram.nix
-          ./addons/wljs-notebook.nix
-          ./addons/wolfie.nix
+          ./modules
+          ./system
 
           nix-flatpak.nixosModules.nix-flatpak
           home-manager.nixosModules.home-manager
@@ -80,7 +75,7 @@
               extraSpecialArgs = { inherit inputs username; };
               # plasma-manager has to be a *home-manager* module
               sharedModules = [ plasma-manager.homeModules.plasma-manager ];
-              users.${username} = import ./home/home.nix;
+              users.${username} = import ./home;
             };
           }
         ];

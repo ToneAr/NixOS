@@ -17,3 +17,5 @@ ExceptionWindowPropertyType=0
 HideTitleBar=1
 OpaqueTitleBar=false
 PreventApplyOpacityToHeader=false
+[Style]
+MenuOpacity=30

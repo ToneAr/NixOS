@@ -1,4 +1,4 @@
-{ pkgs, ... }: # Arguments go first!
+{ pkgs, username, ... }: # Arguments go first!
 
 let
   yet-another-monochrome-icon-set = pkgs.stdenv.mkDerivation rec {
@@ -12,7 +12,7 @@ let
       sha256 = "sha256-KZXG5XYHhUfgDrxOXT1mS+vbmH9l0uEzfdvOo1+r1TQ=";
     };
 
-    nativeBuildInputs = [ pkgs.gtk3 ];
+    nativeBuildInputs = [ pkgs.gtk3 ]; 
     dontBuild = true;
 
     installPhase = ''
@@ -23,6 +23,5 @@ let
   };
 in
 {
-  # Expose the derivation so it can be consumed by home-manager or systemPackages
-  inherit yet-another-monochrome-icon-set;
+  users.users.${username}.packages = [ yet-another-monochrome-icon-set ];
 }

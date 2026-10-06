@@ -6,9 +6,9 @@
 # panel launchers, your Plasma autostart entries, or your fish config.
 #
 # Every attribute here was checked against nixpkgs before being written down.
-{ pkgs, ... }:
+{ pkgs, username, ... }:
 {
-  home.packages = with pkgs; [
+  users.users.${username}.packages = with pkgs; [
     # ---- compilers -------------------------------------------------
     (lib.hiPrio gcc)
     clang
