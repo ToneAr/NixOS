@@ -28,7 +28,16 @@
       };
     };
 
-    
+    ## Laptop touchpad (ThinkPad, Synaptics I2C). Pinned on so a stray
+    ## Touchpad Toggle press doesn't leave it disabled across rebuilds.
+    input.touchpads = [
+      {
+        name = "SYNA8018:00 06CB:CE67 Touchpad";
+        vendorId = "06cb";
+        productId = "ce67";
+        enable = true;
+      }
+    ];
 
     configFile = {
       ## Locale
@@ -135,4 +144,18 @@
       dolphinrc.VersionControl.enabledPlugins = "Git";
     };
   };
+
+  ## Blueman ships an XDG autostart entry with no desktop restriction, so it
+  ## ran alongside Plasma's own Bluetooth applet. Shadow it in the user
+  ## autostart dir and hide it under KDE only.
+  xdg.configFile."autostart/blueman.desktop".text = ''
+    [Desktop Entry]
+    Name=Blueman Applet
+    Comment=Blueman Bluetooth Manager
+    Icon=blueman
+    Exec=blueman-applet
+    Terminal=false
+    Type=Application
+    NotShowIn=KDE;
+  '';
 }

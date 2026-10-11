@@ -19,3 +19,5 @@ OpaqueTitleBar=false
 PreventApplyOpacityToHeader=false
 [Style]
 MenuOpacity=30
+FrameCornerRadius=FCR_Custom
+FrameCustomCornerRadius=8

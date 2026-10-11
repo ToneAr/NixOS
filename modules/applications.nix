@@ -52,6 +52,7 @@
     rustup
     ollama
     gitkraken
+    unzip
 
     # ---- debugging -------------------------------------------------
     gdb

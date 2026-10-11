@@ -3,6 +3,7 @@
   imports = [
     ./applications.nix
     ./flatpak.nix
+    ./gamedev.nix
     ./breezex.nix
     ./yamis.nix
     ./wolframscript.nix

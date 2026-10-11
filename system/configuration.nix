@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ pkgs, username, lib, options, ... }:
 {
   # ---- Boot ----------------------------------------------------------
   boot.loader.systemd-boot.enable = true;
@@ -57,6 +57,13 @@
     pulse.enable = true;
   };
 
+  # Audient iD14: the hardware "Speaker" control only attenuates the right
+  # channel (left is always at full level), so pin it to 100% on hotplug and
+  # leave volume to PipeWire. https://bbs.archlinux.org/viewtopic.php?id=289727
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="sound", KERNEL=="controlC*", ATTRS{idVendor}=="2708", ATTRS{idProduct}=="0008", RUN+="${pkgs.alsa-utils}/bin/amixer -c %n sset Speaker 100%%"
+  '';
+
   # ---- Hardware services (enabled on Arch) ----------------------------
   hardware.bluetooth = {
     enable = true;
@@ -66,9 +73,13 @@
   # Facial Recognition
   # "sufficient" lets the password still work when no face matches; the
   # module's default ("required") makes a failed face check block login/sudo.
+  services.linux-enable-ir-emitter.enable = true;
   services.howdy = {
     enable = true;
     control = "sufficient";
+    settings = lib.recursiveUpdate options.services.howdy.settings.default {
+      video.device_path = "/dev/v4l/by-id/usb-046d_Logi_4K_Stream_Edition_091E7F2C-video-index2";
+    };
   };
   
   # Fingerprint
@@ -166,6 +177,10 @@
   # Needs a Wolfram kernel at runtime (wolfram.enable above, or one on PATH).
   wolfie.enable = true;
   # wolfie.version = "v0.9.20b";   # pin a release; default is "latest"
+
+  # Engines, asset tools, graphics debuggers, Steam/gamemode, and extra
+  # nix-ld runtime libraries for prebuilt engines. See modules/gamedev.nix.
+  gamedev.enable = false;
 
   # Lets prebuilt, non-Nix binaries (installers, downloaded CLIs) find a
   # dynamic linker and common libraries.

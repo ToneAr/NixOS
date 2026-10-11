@@ -7,8 +7,12 @@
 let
   breezeDialog = "${pkgs.kdePackages.libplasma}/share/plasma/desktoptheme/default/translucent/dialogs/background.svgz";
 
+  # Corner radius of list/menu highlights (Breeze uses 5); the glass windows
+  # around them are 20.
+  highlightRadius = 10;
+
   mkGlassTheme = variant: pkgs.runCommand "klassy-${variant}-glass-plasma-theme" {
-    nativeBuildInputs = [ pkgs.jq ];
+    nativeBuildInputs = [ pkgs.jq pkgs.python3 ];
   } ''
     dir=$out/share/plasma/desktoptheme/klassy-${variant}-glass
     mkdir -p $(dirname $dir)
@@ -32,6 +36,68 @@ let
       mkdir -p $dir/$d
       cp background.svgz $dir/$d/background.svgz
     done
+
+    # Highlights (launcher, KRunner, tray popups, ...): Breeze's viewitem
+    # styling (hover = 30% fill + 1px border, selected = 80% fill, both in
+    # ButtonFocus) redrawn with a larger corner radius.
+    mkdir -p $dir/widgets
+    python3 - ${toString highlightRadius} <<'EOF' | gzip -9n > $dir/widgets/viewitem.svgz
+    import sys
+
+    R = float(sys.argv[1])
+    parts = ["topleft", "top", "topright", "left", "center", "right",
+             "bottomleft", "bottom", "bottomright"]
+    # prefix: (fill opacity, border opacity or None)
+    styles = {"normal": (0.005, None), "hover": (0.3, 1.0), "selected": (0.8, None)}
+
+    def shape(part, x, y, border):
+        """Fill (border=False) or 1px border ring (border=True) of one cell."""
+        r, i = R, R - 1
+        if part == "center":
+            return None if border else f"M{x},{y}h{r}v{r}h{-r}z"
+        if part in ("top", "bottom", "left", "right"):
+            if not border:
+                return f"M{x},{y}h{r}v{r}h{-r}z"
+            return {"top": f"M{x},{y}h{r}v1h{-r}z",
+                    "bottom": f"M{x},{y+r-1}h{r}v1h{-r}z",
+                    "left": f"M{x},{y}h1v{r}h-1z",
+                    "right": f"M{x+r-1},{y}h1v{r}h-1z"}[part]
+        # Corners: quarter disc of radius R centred on the inner corner.
+        cx = x + r if "left" in part else x
+        cy = y + r if "top" in part else y
+        sx = -1 if "left" in part else 1
+        sy = -1 if "top" in part else 1
+        a = (cx + sx * r, cy)            # point on the horizontal radius
+        b = (cx, cy + sy * r)            # point on the vertical radius
+        sweep = 1 if sx * sy > 0 else 0  # arc direction from a to b
+        if not border:
+            return (f"M{cx},{cy}L{a[0]},{a[1]}"
+                    f"A{r},{r} 0 0 {sweep} {b[0]},{b[1]}z")
+        a2 = (cx + sx * i, cy)
+        b2 = (cx, cy + sy * i)
+        return (f"M{a[0]},{a[1]}A{r},{r} 0 0 {sweep} {b[0]},{b[1]}"
+                f"L{b2[0]},{b2[1]}A{i},{i} 0 0 {1 - sweep} {a2[0]},{a2[1]}z")
+
+    out = ['<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200">',
+           '<style id="current-color-scheme" type="text/css">'
+           '.ColorScheme-ButtonFocus{color:#1E92FF;}</style>']
+    for row, (prefix, (fill, border)) in enumerate(styles.items()):
+        ox, oy = 10, 10 + row * (3 * R + 10)
+        for n, part in enumerate(parts):
+            x, y = ox + (n % 3) * R, oy + (n // 3) * R
+            out.append(f'<g id="{prefix}-{part}">')
+            out.append(f'<path class="ColorScheme-ButtonFocus" '
+                       f'style="fill:currentColor;opacity:{fill}" '
+                       f'd="{shape(part, x, y, False)}"/>')
+            ring = border and shape(part, x, y, True)
+            if ring:
+                out.append(f'<path class="ColorScheme-ButtonFocus" '
+                           f'style="fill:currentColor;opacity:{border}" '
+                           f'd="{ring}"/>')
+            out.append('</g>')
+    out.append('</svg>')
+    print("\n".join(out))
+    EOF
   '';
 
   # KlassyDarkGlass / KlassyLightGlass colour schemes: the Klassy schemes with

@@ -17,7 +17,7 @@
       kwinrulesrc.opaque.opacityinactive = 100;
       kwinrulesrc.opaque.opacityinactiverule = 2;
       kwinrulesrc.opaque.wmclasscomplete = true;
-      kwinrulesrc.opaque.title = "(Picture-in-Picture)|(.* - YouTube.*)";
+      kwinrulesrc.opaque.title = "(.* — Zen Browser)|(Picture-in-Picture)|(.* - YouTube.*)";
       kwinrulesrc.opaque.titlematch = 3;
 
       kwinrulesrc.kitty.Description = "Kitty";
@@ -33,7 +33,7 @@
       kwinrulesrc.konsole.wmclass = "konsole org.kde.konsole";
       kwinrulesrc.konsole.wmclasscomplete = true;
       kwinrulesrc.konsole.wmclassmatch = 1;
-  
+
       kwinrulesrc.evolution-notify.Description = "Evolution notify";
       kwinrulesrc.evolution-notify.above = true;
       kwinrulesrc.evolution-notify.aboverule = 2;

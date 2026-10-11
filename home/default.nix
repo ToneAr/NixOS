@@ -7,6 +7,7 @@
   imports = [
     ./home-base.nix
     ./dotfiles.nix
+    ./agents.nix
     ./plasma
     ./hyprland.nix
   ];
