@@ -8,8 +8,8 @@
 # installed globally: on NixOS a compiler/pkg-config won't find headers in a
 # user profile. Pull them into a per-project `nix develop` shell instead.
 #
-# Not in nixpkgs, install by hand: Unreal Engine (build from source; runs via
-# nix-ld below), Defold, FMOD/Wwise. Unity editors come through Unity Hub.
+# Not in nixpkgs, install by hand: Defold, FMOD/Wwise. Unreal Engine has its
+# own module (unreal-engine.nix). Unity editors come through Unity Hub.
 { config, lib, options, pkgs, username, ... }:
 let
   cfg = config.gamedev;

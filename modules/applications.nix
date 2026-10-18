@@ -90,6 +90,7 @@
     zoom-us
     kdePackages.konversation
     discord
+    telegram-desktop
 
     # ---- Hyprland session ------------------------------------------
     waybar
