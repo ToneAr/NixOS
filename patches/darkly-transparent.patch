@@ -1,0 +1,267 @@
+diff -ru a/desktoptheme/dialogs/background.svg b/desktoptheme/dialogs/background.svg
+--- a/desktoptheme/dialogs/background.svg	2026-10-18 21:29:50.097612692 +0100
++++ b/desktoptheme/dialogs/background.svg	2026-10-18 21:29:50.102415027 +0100
+@@ -207,7 +207,7 @@
+     <rect
+        id="rect4152"
+        height="6"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="32"
+        x="0"
+@@ -225,13 +225,13 @@
+     <rect
+        id="rect4148"
+        height="6"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="32"
+        x="0"
+        y="0" />
+     <path
+-       style="opacity:0.5;fill:currentColor"
++       style="opacity:0.15;fill:currentColor"
+        d="M 0,5 V 6 H 32 V 5 Z"
+        id="path1671"
+        class="ColorScheme-Background"
+@@ -243,13 +243,13 @@
+     <rect
+        id="rect4144"
+        height="32"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="6"
+        x="0"
+        y="0" />
+     <path
+-       style="opacity:0.5;fill:currentColor"
++       style="opacity:0.15;fill:currentColor"
+        d="M 0,32 H 1 V 0 H 0 Z"
+        id="path1785"
+        class="ColorScheme-Background"
+@@ -261,13 +261,13 @@
+     <rect
+        id="rect4140"
+        height="32"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="6"
+        x="0"
+        y="0" />
+     <path
+-       style="opacity:0.5;fill:currentColor"
++       style="opacity:0.15;fill:currentColor"
+        d="M 5,32 H 6 V 0 H 5 Z"
+        id="path1902"
+        class="ColorScheme-Background"
+@@ -279,7 +279,7 @@
+     <rect
+        id="rect4138"
+        height="32"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="32"
+        x="0"
+@@ -290,7 +290,7 @@
+      transform="translate(2.0288086e-6,9.999999)">
+     <path
+        d="M 0,6 H 6 V 0 C 2,0 0,2 0,6 Z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3"
+        sodipodi:nodetypes="cccc" />
+@@ -305,7 +305,7 @@
+      transform="translate(38.000002,9.999999)">
+     <path
+        d="M 0,0 V 6 H 6 C 6,2 4,0 0,0 Z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3118"
+        sodipodi:nodetypes="cccc" />
+@@ -320,7 +320,7 @@
+      transform="translate(2.0288086e-6,47.999999)">
+     <path
+        d="M 6,6 V 0 H 0 c 0,4 2,6 6,6 z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3124"
+        sodipodi:nodetypes="cccc" />
+@@ -330,7 +330,7 @@
+      transform="translate(38.000002,47.999999)">
+     <path
+        d="M 0,6 V 0 H 6 C 6,4 4,6 0,6 Z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3121"
+        sodipodi:nodetypes="cccc" />
+diff -ru a/desktoptheme/widgets/background.svg b/desktoptheme/widgets/background.svg
+--- a/desktoptheme/widgets/background.svg	2026-10-18 21:29:50.097710874 +0100
++++ b/desktoptheme/widgets/background.svg	2026-10-18 21:29:50.105034914 +0100
+@@ -215,7 +215,7 @@
+        d="m19 6c-3.324 0-6 2.676-6 6h6v-5z"
+        transform="translate(0,904.36)"
+       class="ColorScheme-Background"
+-      style="opacity:0.96;fill:currentColor;fill-opacity:1" />
++      style="opacity:0.3;fill:currentColor;fill-opacity:1" />
+   </g>
+   <rect
+      fill="#f60"
+@@ -235,7 +235,7 @@
+        x="-916.36"
+        transform="matrix(0,-1,-1,0,0,0)"
+       class="ColorScheme-Background"
+-      style="opacity:0.96;fill:currentColor;fill-opacity:1" />
++      style="opacity:0.3;fill:currentColor;fill-opacity:1" />
+     <rect
+        id="rect25"
+        fill="url(#linearGradient948)"
+@@ -258,7 +258,7 @@
+        x="948.36"
+        transform="rotate(90)"
+       class="ColorScheme-Background"
+-      style="opacity:0.96;fill:currentColor;fill-opacity:1" />
++      style="opacity:0.3;fill:currentColor;fill-opacity:1" />
+     <rect
+        id="rect30"
+        fill="url(#linearGradient956)"
+@@ -281,7 +281,7 @@
+        x="-19"
+        transform="scale(-1,1)"
+       class="ColorScheme-Background"
+-      style="opacity:0.96;fill:currentColor;fill-opacity:1" />
++      style="opacity:0.3;fill:currentColor;fill-opacity:1" />
+     <rect
+        id="rect35"
+        fill="url(#linearGradient952)"
+@@ -303,7 +303,7 @@
+        y="916.36"
+        x="51"
+       class="ColorScheme-Background"
+-      style="opacity:0.96;fill:currentColor;fill-opacity:1" />
++      style="opacity:0.3;fill:currentColor;fill-opacity:1" />
+     <rect
+        id="rect40"
+        fill="url(#linearGradient958)"
+@@ -331,7 +331,7 @@
+        y="916.36"
+        x="19"
+       class="ColorScheme-Background"
+-      style="opacity:0.96;fill:currentColor;fill-opacity:1" />
++      style="opacity:0.3;fill:currentColor;fill-opacity:1" />
+   </g>
+   <rect
+      height="24"
+diff -ru a/desktoptheme/widgets/panel-background.svg b/desktoptheme/widgets/panel-background.svg
+--- a/desktoptheme/widgets/panel-background.svg	2026-10-18 21:29:50.098003420 +0100
++++ b/desktoptheme/widgets/panel-background.svg	2026-10-18 21:29:50.103786047 +0100
+@@ -245,7 +245,7 @@
+     <rect
+        id="rect4152"
+        height="6"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="32"
+        x="0"
+@@ -263,13 +263,13 @@
+     <rect
+        id="rect4148"
+        height="6"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="32"
+        x="0"
+        y="0" />
+     <path
+-       style="opacity:0.85;fill:currentColor"
++       style="opacity:0.25;fill:currentColor"
+        d="M 0,5 V 6 H 32 V 5 Z"
+        id="path1671"
+        class="ColorScheme-Background"
+@@ -281,13 +281,13 @@
+     <rect
+        id="rect4144"
+        height="32"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="6"
+        x="0"
+        y="0" />
+     <path
+-       style="opacity:0.85;fill:currentColor"
++       style="opacity:0.25;fill:currentColor"
+        d="M 0,32 H 1 V 0 H 0 Z"
+        id="path1785"
+        class="ColorScheme-Background"
+@@ -299,13 +299,13 @@
+     <rect
+        id="rect4140"
+        height="32"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="6"
+        x="0"
+        y="0" />
+     <path
+-       style="opacity:0.85;fill:currentColor"
++       style="opacity:0.25;fill:currentColor"
+        d="M 5,32 H 6 V 0 H 5 Z"
+        id="path1902"
+        class="ColorScheme-Background"
+@@ -317,7 +317,7 @@
+     <rect
+        id="rect4138"
+        height="32"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        width="32"
+        x="0"
+@@ -328,7 +328,7 @@
+      transform="translate(0,10)">
+     <path
+        d="M 0,6 H 6 V 0 C 2,0 0,2 0,6 Z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3115"
+        sodipodi:nodetypes="cccc" />
+@@ -343,7 +343,7 @@
+      transform="translate(38,10)">
+     <path
+        d="M 0,0 V 6 H 6 C 6,2 4,0 0,0 Z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3118"
+        sodipodi:nodetypes="cccc" />
+@@ -358,7 +358,7 @@
+      transform="translate(0,48)">
+     <path
+        d="M 6,6 V 0 H 0 c 0,4 2,6 6,6 z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3124"
+        sodipodi:nodetypes="cccc" />
+@@ -368,7 +368,7 @@
+      transform="translate(38,48)">
+     <path
+        d="M 0,6 V 0 H 6 C 6,4 4,6 0,6 Z"
+-       style="opacity:1;fill:currentColor"
++       style="opacity:0.3;fill:currentColor"
+        class="ColorScheme-Background"
+        id="path3121"
+        sodipodi:nodetypes="cccc" />

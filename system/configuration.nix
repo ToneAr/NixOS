@@ -128,7 +128,11 @@
   # Without these, Plasma silently falls back to Breeze.
   environment.systemPackages = with pkgs; [
     klassy
-    darkly
+    (darkly.overrideAttrs (old: {
+      # Translucent Plasma theme backgrounds (dialogs, panels, widgets) so
+      # KWin's blur shows through, matching the glass setup.
+      patches = (old.patches or [ ]) ++ [ ../patches/darkly-transparent.patch ];
+    }))
   ];
 
   fonts.packages = with pkgs; [

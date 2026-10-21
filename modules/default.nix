@@ -4,6 +4,7 @@
     ./applications.nix
     ./flatpak.nix
     ./gamedev.nix
+    ./unreal-engine.nix
     ./breezex.nix
     ./yamis.nix
     ./wolframscript.nix

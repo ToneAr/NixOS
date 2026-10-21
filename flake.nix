@@ -25,12 +25,6 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    hermes-agent = {
-      url = "github:NousResearch/hermes-agent?ref=v0.22.2";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
-
     omp-theme = {
       url = "github:ToneAr/ADAPTIVE-oh-my-posh-theme";
       flake = false;
